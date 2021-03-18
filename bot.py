@@ -342,6 +342,14 @@ def svuota_coda():
     list_coda.clear()
 
 
+@bot.command(aliases=["clr"])
+async def clear(ctx):
+    svuota_coda();
+    await ctx.send(embed=discord.Embed(title="Coda Svuotata",
+                                           description="Nella coda ora non è presente nessun brano",
+                                           color=colore))
+
+
 @bot.command(aliases=["queue"])
 async def coda(ctx):
     if len(list_coda) == 0:
