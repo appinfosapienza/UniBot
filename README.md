@@ -1,5 +1,5 @@
 # unibot
-Bot Discord brutto
+### Discord bot for the Computer Science class in Sapienza, University of Rome
 
 Alcune piccole regole per la scrittura del codice:
 1) Quando si importa un'intera libreria usate "import nomeLibreria", non "from nomeLibreria import \*". Ciò è fatto per evitare di importare variabile di librerie che non utilizziamo e che potremmo pontenzialmente sovrascrivere creando potenziali problemi difficili da risolvere.
