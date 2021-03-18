@@ -66,6 +66,12 @@ bot = commands.Bot(command_prefix=COMMAND_PREFIX, intents=intents, help_command=
 # ------------ BOT.COMMANDS SECTION ------------- #
 # ----------------------------------------------- #
 
+@bot.command(aliases=["Restartbot"])
+async def help(ctx: Context):
+    message = "I'm self-rebooting (will check for updates during reboot)"
+    title = "Service"
+    await ctx.channel.send(embed=discord.Embed(title = title, description=message, color=colore))
+    os._exit(os.EX_OK)
 
 @bot.command(aliases=["Help"])
 async def help(ctx: Context):
