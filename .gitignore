@@ -1,0 +1,5 @@
+/tokenBot.txt
+*.pyc
+/__pycache__
+/.vscode
+/.git
