@@ -28,10 +28,9 @@ file_docenti = 'sitiDocenti.txt'
 file_ricevimento = 'ricevimentoDocenti.txt'
 file_calendario = 'calendario.png'
 file_help = 'help.txt'
+ytlink = "https://www.youtube.com"
 colore = 0x822434
-global list_coda
 list_coda = []
-global ydl_opts
 ydl_opts = {
     'format': 'bestaudio/best',
     'noplaylist': 'True',
@@ -41,14 +40,12 @@ ydl_opts = {
         'preferredquality': '192',
     }],
 }
-global list_titles
+FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 list_titles = []
-global nowPlaying
 nowPlaying = [""]
-global volume
 global_volume = [0.5]
 
-random.seed() #Random initialization
+random.seed()  # Random initialization
 
 
 # ---------------------------------------------- #
@@ -69,9 +66,10 @@ bot = commands.Bot(command_prefix=COMMAND_PREFIX, intents=intents, help_command=
 @bot.command(aliases=["Restartbot"])
 async def restartbot(ctx: Context):
     message = "I'm self-rebooting (will check for updates during reboot)"
-    title = "Service"
-    await ctx.channel.send(embed=discord.Embed(title = title, description=message, color=colore))
+    title = "Reboot"
+    await ctx.channel.send(embed=discord.Embed(title=title, description=message, color=colore))
     os._exit(os.EX_OK)
+
 
 @bot.command(aliases=["Help"])
 async def help(ctx: Context):
@@ -79,7 +77,7 @@ async def help(ctx: Context):
     helpStr = f.read()
     titolo = "Unibot 2.0 Help"
 
-    await ctx.channel.send(embed=discord.Embed(title = titolo, description=helpStr, color=colore))
+    await ctx.channel.send(embed=discord.Embed(title=titolo, description=helpStr, color=colore))
 
 
 @bot.command(aliases=['Hello'])
@@ -137,7 +135,7 @@ async def roll(ctx: Context, *args):
 
 
 @bot.command(aliases=["Lezione", "lezioni", "Lezioni"])
-async def lezione(ctx : Context):
+async def lezione(ctx: Context):
     day = date.today().weekday()  # Prende il giorno della settimana
     mese = int(time.strftime("%m", time.localtime()))
     giornoMese = int(time.strftime("%d", time.localtime()))  # Prende il giorno del mese
@@ -160,7 +158,7 @@ async def docenti(ctx: Context):
     f = open(file_docenti, encoding='utf8')
     link_docenti = f.read()
     titolo = "Siti ufficiali dei docenti, anno 2020/2021, canale 2:"
-    await ctx.channel.send(embed=discord.Embed(title=titolo, description= link_docenti, color=colore))
+    await ctx.channel.send(embed=discord.Embed(title=titolo, description=link_docenti, color=colore))
 
 
 @bot.command(aliases=["Ricevimenti", "ricevimento", "Ricevimento"])
@@ -172,7 +170,6 @@ async def ricevimenti(ctx: Context):
 
 @bot.command(aliases=["Fatti"])
 async def fatti(ctx: Context):
-    listaFatti = []
     with open('curiosity.txt', encoding='utf-8') as fatti:
         listaFatti = fatti.readlines()
     factValue = random.randint(0, len(listaFatti))
@@ -200,8 +197,8 @@ async def role(ctx: Context, *args):
         stringok = True
         rle = get(ctx.message.guild.roles, name=ruoli[stringa])
         await ctx.message.author.add_roles(rle, reason="Richiesto dall'utente")
-        ruolo = "Adesso hai il ruolo **"+ ruoli[stringa] +"** e l'accesso alla sezione **Abituali** nel server!\n" + ctx.author.mention + "!"
-        await ctx.channel.send(embed=discord.Embed(title="Ruolo assegnato", description= ruolo, color=colore))
+        ruolo = "Adesso hai il ruolo **" + ruoli[stringa] + "** e l'accesso alla sezione **Abituali** nel server!\n" + ctx.author.mention + "!"
+        await ctx.channel.send(embed=discord.Embed(title="Ruolo assegnato", description=ruolo, color=colore))
     except:
         if stringok:
             await ctx.channel.send(embed=discord.Embed(title="Errore", description=errore, color=colore))
@@ -216,8 +213,8 @@ async def remove(ctx: Context, *args):
         stringa = args[0]
         rle = get(ctx.message.guild.roles, name=ruoli[stringa])
         await ctx.message.author.remove_roles(rle, reason="Richiesto dall'utente")
-        ruolo = "Hai rimosso il ruolo **"+ ruoli[stringa] +"**\n" + ctx.author.mention
-        await ctx.channel.send(embed=discord.Embed(title="Ruolo rimosso", description= ruolo, color=colore))
+        ruolo = "Hai rimosso il ruolo **" + ruoli[stringa] + "**\n" + ctx.author.mention
+        await ctx.channel.send(embed=discord.Embed(title="Ruolo rimosso", description=ruolo, color=colore))
     except:
         await ctx.channel.send(embed=discord.Embed(title="Errore", description=errore, color=colore))
 
@@ -229,12 +226,11 @@ async def remove(ctx: Context, *args):
 
 @bot.command()
 async def play(ctx):
-    FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
     # Cerchiamo l'utente che ha richiesto il brano
     user = ctx.message.author
     url = str(ctx.message.content)
     url = url[5:]
-    if user.voice == None:
+    if user.voice is None:
         await ctx.send(embed=discord.Embed(title="Utente non trovato",
                                            description="Prima unisciti ad un canale, dopo fai entrare il bot!",
                                            color=colore))
@@ -248,42 +244,32 @@ async def play(ctx):
     if url != "":
         # Prendiamo l'istanza voice
         voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-        # Ci ricaviamo il campo di ricerca dell'utente
-        song_there = os.path.isfile("song.mp3")
-        # Se non ci sono brani in ascolto, cancelliamo l'ultimo brano salvato se presente, altrimenti mettiamo in coda
-        if not voice.is_playing() and not voice.is_paused():
-            if song_there:
-                os.remove("song.mp3")
-        else:
-            try:
-                results = YoutubeSearch(url, max_results=1).to_dict()
-            except:
-                await ctx.send(embed=discord.Embed(title="Nessun risultato trovato",
-                                                   description="Non siamo riusciti a trovare ciò che cercavi\n"
-                                                   "Prova ad essere più preciso",
-                                                   color=colore))
-            list_coda.append(url)
-            list_titles.append(results[0]['title'])
-            await ctx.send(embed=discord.Embed(title="Brano messo in coda",
-                                               description="Il brano **" + results[0]['title'] + "** è stato messo in coda",
-                                               color=colore))
-            return
-        # Analizziamo il campo di ricerca e forniamo il giusto video
-        results = YoutubeSearch(url, max_results=1).to_dict()
-        if len(results) == 0:
+        try:
+            # Cerchiamo il brano
+            results = YoutubeSearch(url, max_results=1).to_dict()
+        except:
             await ctx.send(embed=discord.Embed(title="Nessun risultato trovato",
                                                description="Non siamo riusciti a trovare ciò che cercavi\n"
                                                "Prova ad essere più preciso",
                                                color=colore))
             return
+        if voice.is_playing() or voice.is_paused():
+            # Se abbiamo un brano in riproduzione, mettiamo in coda il brano richiesto
+            list_coda.append(url)
+            list_titles.append(results[0]['title'])
+            await ctx.send(embed=discord.Embed(title="Brano messo in coda",
+                                               description="Il brano **" + results[0][
+                                                   'title'] + "** è stato messo in coda",
+                                               color=colore))
+            return
+        # Altrimenti lo riproduciamo
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             await ctx.send(embed=discord.Embed(title="Attendere...",
-                                               description="Sto scaricando il brano **"+ results[0]['title'] +"**\n "
-                                                           "Dammi un secondo...\n"
-                                                           "**Non richiedere altre canzoni durante questo processo**",
+                                               description="Sto elaborando il brano **" + results[0]['title'] + "**\n "
+                                                           "Dammi un secondo...",
                                                color=colore))
             try:
-                url = "https://www.youtube.com" + results[0]['url_suffix']
+                url = ytlink + results[0]['url_suffix']
                 info = ydl.extract_info(url, download=False)
             except:
                 await ctx.send(embed=discord.Embed(title="Errore",
@@ -291,10 +277,7 @@ async def play(ctx):
                                                                "Se il link inserito è valido riprovare più tardi...",
                                                    color=colore))
                 return
-        # Se la ricerca è andata a buon fine, cambiamo il nome del file e lo mandiamo in esecuzione
-        for file in os.listdir("./"):
-            if file.endswith(".mp3"):
-                os.rename(file, "song.mp3")
+        # Se la ricerca è andata a buon fine mandiamo il brano in esecuzione
         try:
             voice.play(discord.FFmpegPCMAudio(info['formats'][0]['url'], **FFMPEG_OPTS), after=lambda e: queue(ctx))
             voice.source = discord.PCMVolumeTransformer(voice.source, volume=global_volume[0])
@@ -303,7 +286,7 @@ async def play(ctx):
                                                description="Ci si è inceppato il disco...",
                                                color=colore))
             return
-        nowPlaying[0] = "https://www.youtube.com" + results[0]['url_suffix']
+        nowPlaying[0] = ytlink + results[0]['url_suffix']
     else:
         await ctx.send(embed=discord.Embed(title="Connesso",
                                            description="Ora scegli un brano!",
@@ -315,22 +298,15 @@ async def play(ctx):
 
 def queue(ctx):
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-    song_there = os.path.isfile("song.mp3")
-    FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
-    if song_there:
-        os.remove("song.mp3")
     if len(list_coda) != 0:
         results = YoutubeSearch(list_coda[0], max_results=1).to_dict()
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            url = "https://www.youtube.com" + results[0]['url_suffix']
+            url = ytlink + results[0]['url_suffix']
             info = ydl.extract_info(url, download=False)
-        for file in os.listdir("./"):
-            if file.endswith(".mp3"):
-                os.rename(file, "song.mp3")
         try:
             voice.play(discord.FFmpegPCMAudio(info['formats'][0]['url'], **FFMPEG_OPTS), after=lambda e: queue(ctx))
             voice.source = discord.PCMVolumeTransformer(voice.source, volume=global_volume[0])
-            nowPlaying[0] = "https://www.youtube.com" + results[0]['url_suffix']
+            nowPlaying[0] = ytlink + results[0]['url_suffix']
         except:
             print("Errore nella riproduzione della coda")
             return
@@ -344,36 +320,39 @@ def svuota_coda():
 
 @bot.command(aliases=["clr"])
 async def clear(ctx):
-    svuota_coda();
-    await ctx.send(embed=discord.Embed(title="Coda Svuotata",
+    if await permessi(ctx):
+        svuota_coda()
+        await ctx.send(embed=discord.Embed(title="Coda Svuotata",
                                            description="Nella coda ora non è presente nessun brano",
                                            color=colore))
 
 
 @bot.command(aliases=["queue"])
 async def coda(ctx):
-    if len(list_coda) == 0:
-        await ctx.send(embed=discord.Embed(title="Coda vuota",
-                                           description="Nella coda non è presente nessun brano",
-                                           color=colore))
-    else:
-        stringa = "\n".join(list_titles)
-        await ctx.send(embed=discord.Embed(title="Coda",
-                                           description=stringa,
-                                           color=colore))
+    if await permessi(ctx):
+        if len(list_coda) == 0:
+            await ctx.send(embed=discord.Embed(title="Coda vuota",
+                                               description="Nella coda non è presente nessun brano",
+                                               color=colore))
+        else:
+            stringa = "\n".join(list_titles)
+            await ctx.send(embed=discord.Embed(title="Coda",
+                                               description=stringa,
+                                               color=colore))
 
 
-@bot.command(aliases = ["NowPlaying"])
+@bot.command(aliases=["NowPlaying"])
 async def np(ctx):
-    voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-    if not voice.is_playing() and not voice.is_paused():
-        await ctx.send(embed=discord.Embed(title="Silenzio....",
-                                           description="Il silenzio regna su di noi...",
-                                           color=colore))
-    else:
-        await ctx.send(embed=discord.Embed(title="Ora in riproduzione",
-                                       color=colore))
-        await ctx.send(nowPlaying[0])
+    if await permessi(ctx):
+        voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+        if not voice.is_playing() and not voice.is_paused():
+            await ctx.send(embed=discord.Embed(title="Silenzio....",
+                                               description="Il silenzio regna su di noi...",
+                                               color=colore))
+        else:
+            await ctx.send(embed=discord.Embed(title="Ora in riproduzione",
+                                               color=colore))
+            await ctx.send(nowPlaying[0])
 
 
 # ---FINE GESTIONE DELLA CODA--- #
@@ -381,109 +360,143 @@ async def np(ctx):
 
 @bot.command()
 async def volume(ctx, *args):
-    voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-    try:
-        volume = args[0]
-    except:
-        await ctx.send(embed=discord.Embed(title="Volume",
-                                           description="Il volume al momento è a " + str(voice.source.volume*100),
-                                           color=colore))
-        return
-    new_volume = float(volume)
-    if 0 <= new_volume <= 100:
-        global_volume[0] = new_volume / 100
-        voice.source.volume = global_volume[0]
-        await ctx.send(embed=discord.Embed(title="Volume modificato",
-                                           description="Il nuovo volume è impostato a " + str(new_volume),
-                                           color=colore))
-    else:
-        await ctx.send(embed=discord.Embed(title="Errore",
-                                           description="Per favore inserire un valore da 0 a 100",
-                                           color=colore))
+    if await permessi(ctx):
+        voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+        try:
+            volume = args[0]
+        except:
+            await ctx.send(embed=discord.Embed(title="Volume",
+                                               description="Il volume al momento è a " + str(global_volume[0]*100),
+                                               color=colore))
+            return
+        try:
+            new_volume = float(volume)
+        except:
+            await ctx.send(embed=discord.Embed(title="Errore",
+                                               description="Per favore inserire un valore da 0 a 100",
+                                               color=colore))
+            return
+        if 0 <= new_volume <= 100:
+            try:
+                voice.source.volume = new_volume / 100
+                global_volume[0] = new_volume / 100
+            except:
+                await ctx.send(embed=discord.Embed(title="Errore",
+                                                   description="Prima di impostare il volume, riproduci qualcosa!",
+                                                   color=colore))
+                return
+            await ctx.send(embed=discord.Embed(title="Volume modificato",
+                                               description="Il nuovo volume è impostato a " + str(new_volume),
+                                               color=colore))
+        else:
+            await ctx.send(embed=discord.Embed(title="Errore",
+                                               description="Per favore inserire un valore da 0 a 100",
+                                               color=colore))
 
 
 @bot.command(aliases=["next"])
 async def skip(ctx):
-    voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-    if voice.is_connected() and voice.is_playing():
-        if len(list_coda) == 0:
-            await ctx.send(embed=discord.Embed(title="Riproduzione terminata",
-                                               description="I brani in coda sono terminati, aggiungine altri!",
-                                               color=colore))
+    if await permessi(ctx):
+        voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+        if voice.is_connected() and voice.is_playing():
+            if len(list_coda) == 0:
+                await ctx.send(embed=discord.Embed(title="Riproduzione terminata",
+                                                   description="I brani in coda sono terminati, aggiungine altri!",
+                                                   color=colore))
+            else:
+                await ctx.send(embed=discord.Embed(title="Brano Skippato",
+                                                   description="Sto elaborando il nuovo brano **" + list_titles[0] + "**\n"
+                                                               "Dammi un secondo...",
+                                                   color=colore))
+            voice.stop()
         else:
-            await ctx.send(embed=discord.Embed(title="Brano Skippato",
-                                               description="Sto scaricando il nuovo brano **" + list_titles[0] + "**\n"
-                                                           "Dammi un secondo...\n"
-                                                           "**Non richiedere altre canzoni durante questo processo**",
+            await ctx.send(embed=discord.Embed(title="Errore",
+                                               description="Non c'è nulla in riproduzione al momento",
                                                color=colore))
-        voice.stop()
-    else:
-        await ctx.send(embed=discord.Embed(title="Errore",
-                                           description="Non c'è nulla in riproduzione al momento",
-                                           color=colore))
 
 
 @bot.command()
 async def disconnect(ctx):
-    svuota_coda()
-    voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-    if voice.is_connected():
-        await voice.disconnect()
-        await ctx.send(embed=discord.Embed(title="Ciao ciao",
-                                           description="Il bot è stato disconnesso dalla chat vocale",
-                                           color=colore))
-    else:
-        await ctx.send(embed=discord.Embed(title="Errore",
-                                           description="Il bot non è connesso a nessuna chat vocale",
-                                           color=colore))
+    if await permessi(ctx):
+        svuota_coda()
+        voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+        if voice.is_connected():
+            await voice.disconnect()
+            await ctx.send(embed=discord.Embed(title="Ciao ciao",
+                                               description="Il bot è stato disconnesso dalla chat vocale",
+                                               color=colore))
+        else:
+            await ctx.send(embed=discord.Embed(title="Errore",
+                                               description="Il bot non è connesso a nessuna chat vocale",
+                                               color=colore))
 
 
 @bot.command()
 async def pause(ctx):
-    voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-    if voice.is_playing():
-        voice.pause()
-        await ctx.send(embed=discord.Embed(title="Pausa",
-                                     description="Brano messo in pausa",
-                                     color=colore))
-    else:
-        await ctx.send(embed=discord.Embed(title="Errore",
-                                           description="Non c'è nulla in riproduzione al momento",
-                                           color=colore))
+    if await permessi(ctx):
+        voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+        if voice.is_playing():
+            voice.pause()
+            await ctx.send(embed=discord.Embed(title="Pausa",
+                                               description="Brano messo in pausa",
+                                               color=colore))
+        else:
+            await ctx.send(embed=discord.Embed(title="Errore",
+                                               description="Non c'è nulla in riproduzione al momento",
+                                               color=colore))
 
 
 @bot.command()
 async def resume(ctx):
-    voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-    if voice.is_paused():
-        voice.resume()
-        await ctx.send(embed=discord.Embed(title="Brano ripreso",
-                                           description="Il brano è stato ripreso",
-                                           color=colore))
-    elif not voice.is_playing():
-        await ctx.send(embed=discord.Embed(title="Errore",
-                                           description="Non c'è nulla in riproduzione al momento",
-                                           color=colore))
-    else:
-        await ctx.send(embed=discord.Embed(title="Errore",
-                                           description="Il brano non è in pausa",
-                                           color=colore))
+    if await permessi(ctx):
+        voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+        if voice.is_paused():
+            voice.resume()
+            await ctx.send(embed=discord.Embed(title="Brano ripreso",
+                                               description="Il brano è stato ripreso",
+                                               color=colore))
+        elif not voice.is_playing():
+            await ctx.send(embed=discord.Embed(title="Errore",
+                                               description="Non c'è nulla in riproduzione al momento",
+                                               color=colore))
+        else:
+            await ctx.send(embed=discord.Embed(title="Errore",
+                                               description="Il brano non è in pausa",
+                                               color=colore))
 
 
 @bot.command()
 async def stop(ctx):
-    svuota_coda()
-    voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-    if voice.is_playing():
-        await ctx.send(embed=discord.Embed(title="Stop",
-                                           description="Brano interrotto",
-                                           color=colore))
-        voice.stop()
-    else:
-        await ctx.send(embed=discord.Embed(title="Errore",
-                                           description="Non c'è nulla in riproduzione al momento",
-                                           color=colore))
+    if await permessi(ctx):
+        svuota_coda()
+        voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+        if voice.is_playing():
+            await ctx.send(embed=discord.Embed(title="Stop",
+                                               description="Brano interrotto",
+                                               color=colore))
+            voice.stop()
+        else:
+            await ctx.send(embed=discord.Embed(title="Errore",
+                                               description="Non c'è nulla in riproduzione al momento",
+                                               color=colore))
 
+
+async def permessi(ctx):
+    user = ctx.message.author
+    if user.voice is None:
+        await ctx.send(embed=discord.Embed(title="Errore",
+                                           description="Per usare il bot musicale, connettiti ad un canale vocale",
+                                           color=colore))
+        return False
+    else:
+        voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+        if voice is None:
+            await ctx.send(embed=discord.Embed(title="Errore",
+                                               description="Per usare questo comando devi prima chiamare il bot "
+                                                           "con il comando !play",
+                                               color=colore))
+            return False
+    return True
 
 # ---------------------------------------------- #
 # ------------ BOT.EVENT SECTION --------------- #
