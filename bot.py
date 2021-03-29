@@ -147,8 +147,8 @@ async def roll(ctx: Context, *dado):
                     embed=discord.Embed(title="Il risultato del lancio è:", description=str(rollSomma), color=colore))
             else:
                 await ctx.send(embed=discord.Embed(title="Il risultato del lancio è:",
-                                                           description=resultStrDadi + ' ' + '\n' + 'La somma è ' + str(rollSomma),
-                                                           color=0x822434))
+                                                   description=resultStrDadi + ' ' + '\n' + 'La somma è ' + str(rollSomma),
+                                                   color=0x822434))
     except:
         if stringok:
             await ctx.send(embed=discord.Embed(title="Errore", description=errore, color=colore))
@@ -225,7 +225,7 @@ async def f(ctx: Context):
                 ]
                )
              ])
-async def role(ctx: Context, Ruolo : str):
+async def role(ctx: Context, Ruolo: str):
     try:
         rle = get(ctx.guild.roles, name=Ruolo)
         await ctx.author.add_roles(rle, reason="Richiesto dall'utente")
@@ -252,7 +252,7 @@ async def role(ctx: Context, Ruolo : str):
                     name="View-All",
                     value="View-All"
                   )])])
-async def remove(ctx: Context, Ruolo : str):
+async def remove(ctx: Context, Ruolo: str):
     try:
         rle = get(ctx.guild.roles, name=Ruolo)
         await ctx.author.remove_roles(rle, reason="Richiesto dall'utente")
@@ -278,7 +278,7 @@ async def remove(ctx: Context, Ruolo : str):
                     required=True
                  ),
              ])
-async def play(ctx, Titolo : str):
+async def play(ctx, Titolo: str):
     # Cerchiamo l'utente che ha richiesto il brano
     user = ctx.author
     if user.voice is None:
@@ -396,8 +396,6 @@ async def np(ctx):
                                                description="Il silenzio regna su di noi...",
                                                color=colore))
         else:
-            await ctx.send(embed=discord.Embed(title="Ora in riproduzione",
-                                               color=colore))
             await ctx.send(nowPlaying[0])
 
 
