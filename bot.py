@@ -142,7 +142,9 @@ async def lezione(ctx: Context):
     ora = int(time.strftime("%H", time.localtime()))
     minuti = int(time.strftime("%M", time.localtime()))
 
-    ora_attuale = (day, ora + 1, minuti, giornoMese, mese)
+   # ora_attuale = (day, ora + 1, minuti, giornoMese, mese)
+    ora_attuale = (day, ora , minuti, giornoMese, mese)
+
     lezione = funChest.lezione(file_lezione, ora_attuale)
 
     await ctx.channel.send(embed=discord.Embed(title="Lezione:", description=lezione, color=colore))
