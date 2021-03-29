@@ -37,7 +37,7 @@ ORARIO SETTIMANALE:
 
 LINK MATERIE:
 -1,6 >Architettura degli Elaboratori, Prof. Pannone [giorni: 22,25,29]: https://uniroma1.zoom.us/j/88904627537?pwd=Z3VjMmdoUkdGNEFKak9BTGRxMjJXdz09#success Passcode: 118120
--2,7 >Introduzione agli Algoritmi, Prof. Monti: https://uniroma1.zoom.us/j/82106021187?pwd=K0ZpZ0FHVUpFODJ2N09aVWl6UkluQT09#success Passcode: 906783
+-2,7 >Introduzione agli Algoritmi, Prof. Monti: https://meet.google.com/ofm-cvbf-gyd
 -3 >Metodologie di Programmazione, Prof. Navigli: https://meet.google.com/yds-zkxn-cni
 -5 >Laboratorio di Programmazione Java, Prof. Navigli: https://meet.google.com/kqf-urzq-sfj
 -8 >Corso di Inglese, Prof. Merve: https://uniroma1.zoom.us/j/84352725053?pwd=V2h1a2RlaEQ3cDVLYlpSRk9jQzJBdz09 Passcode: 963055
