@@ -143,7 +143,7 @@ async def lezione(ctx: Context):
     minuti = int(time.strftime("%M", time.localtime()))
 
    # ora_attuale = (day, ora + 1, minuti, giornoMese, mese)
-    ora_attuale = (day, ora , minuti, giornoMese, mese)
+    ora_attuale = (day, ora +2, minuti, giornoMese, mese)
 
     lezione = funChest.lezione(file_lezione, ora_attuale)
 
