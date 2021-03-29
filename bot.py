@@ -89,13 +89,13 @@ async def hello(ctx: Context):
 async def ora(ctx: Context):
     ora = int(time.strftime("%H", time.localtime()))
     minuti = time.strftime("%M")
-    orario = 'Sono le ore ' + str(ora + 1) + ":" + minuti
+    orario = 'Sono le ore ' + str(ora) + ":" + minuti
     await ctx.channel.send(embed=discord.Embed(title="Ora", description=orario, color=colore))
 
 
 @bot.command(aliases=['Uptime'])
 async def uptime(ctx: Context):
-    string = 'Sono online dalle ore ' + str(int(oraUp) + 1) + ":" + minutiUp + ' del giorno ' + today
+    string = 'Sono online dalle ore ' + str(int(oraUp)) + ":" + minutiUp + ' del giorno ' + today
     await ctx.channel.send(embed=discord.Embed(title="Uptime", description=string, color=colore))
 
 
@@ -142,8 +142,7 @@ async def lezione(ctx: Context):
     ora = int(time.strftime("%H", time.localtime()))
     minuti = int(time.strftime("%M", time.localtime()))
 
-   # ora_attuale = (day, ora + 1, minuti, giornoMese, mese)
-    ora_attuale = (day, ora +2, minuti, giornoMese, mese)
+    ora_attuale = (day, ora, minuti, giornoMese, mese)
 
     lezione = funChest.lezione(file_lezione, ora_attuale)
 
