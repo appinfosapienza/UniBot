@@ -169,29 +169,28 @@ async def lezione(ctx: Context):
     await ctx.send(embed=discord.Embed(title="Lezione:", description=lezione, color=colore))
 
 
-
-@bot.command(aliases=["Calendario"])
+@slash.slash(name="calendario", description="Mostra un immagine del calendario settimanale")
 async def calendario(ctx: Context):
-    await ctx.channel.send(file=discord.File(file_calendario))
+    await ctx.send(embed=discord.Embed(title="Calendario", color=colore))
+    await ctx.send(file=discord.File(file_calendario))
 
 
-@bot.command(aliases=["Docenti"])
+@slash.slash(name="docenti", description="Mostra tutti i link delle pagine ufficiali dei docenti del canale")
 async def docenti(ctx: Context):
     f = open(file_docenti, encoding='utf8')
     link_docenti = f.read()
     titolo = "Siti ufficiali dei docenti, anno 2020/2021, canale 2:"
-    await ctx.channel.send(embed=discord.Embed(title=titolo, description=link_docenti, color=colore))
+    await ctx.send(embed=discord.Embed(title=titolo, description=link_docenti, color=colore))
 
 
-@bot.command(aliases=["Ricevimenti", "ricevimento", "Ricevimento"])
+@slash.slash(name="ricevimento", description="Mostra tutti i link di eventuali ricevimenti online dei docenti")
 async def ricevimenti(ctx: Context):
     f = open(file_ricevimento, encoding='utf8')
     link_ricevimenti = f.read()
     await ctx.send(embed=discord.Embed(title="Ricevimento:", description=link_ricevimenti, color=colore))
 
 
-
-@bot.command(aliases=["Fatti"])
+@slash.slash(name="fatti", description="Fatti curiosi che il bot vuole dirti!")
 async def fatti(ctx: Context):
     with open('curiosity.txt', encoding='utf-8') as fatti:
         listaFatti = fatti.readlines()
@@ -200,7 +199,7 @@ async def fatti(ctx: Context):
     await ctx.send(embed=discord.Embed(title="Fatto Curioso", description=listaFatti[factValue], color=colore))
 
 
-@bot.command(aliases=['F'])
+@slash.slash(name="F", description="F")
 async def f(ctx: Context):
     await ctx.send(embed=discord.Embed(description='**FFFFFFFFFFFFFFFF**\n**F**\n**F**\n**F**\n**FFFFFFFFF**\n**F**\n**F**\n**F**\n**F**\n**F**',
                                                color=colore))
@@ -402,8 +401,16 @@ async def np(ctx):
 # ---FINE GESTIONE DELLA CODA--- #
 
 
-@bot.command()
-async def volume(ctx, *args):
+@slash.slash(name="volume", description="Mostra a che livello è il volume e permette di modificarlo",
+             options=[
+               create_option(
+                 name="Volume",
+                 description="Inserisci un valore da 0 a 100",
+                 option_type=3,
+                 required=False
+               )
+             ])
+async def volume(ctx, *Volume: int):
     if await permessi(ctx):
         voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
         try:
@@ -438,8 +445,7 @@ async def volume(ctx, *args):
                                                color=colore))
 
 
-
-@bot.command(aliases=["next"])
+@slash.slash(name="skip", description="Salta al brano successivo")
 async def skip(ctx):
     if await permessi(ctx):
         voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
@@ -460,7 +466,7 @@ async def skip(ctx):
                                                color=colore))
 
 
-@bot.command()
+@slash.slash(name="disconnect", description="Disconnette il bot musicale dalla chat vocale")
 async def disconnect(ctx):
     if await permessi(ctx):
         svuota_coda()
@@ -476,8 +482,7 @@ async def disconnect(ctx):
                                                color=colore))
 
 
-
-@bot.command()
+@slash.slash(name="pause", description="Mette in pausa il brano in riproduzione")
 async def pause(ctx):
     if await permessi(ctx):
         voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
@@ -492,7 +497,7 @@ async def pause(ctx):
                                                color=colore))
 
 
-@bot.command()
+@slash.slash(name="resume", description="Riprende la riproduzione del brano")
 async def resume(ctx):
     if await permessi(ctx):
         voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
