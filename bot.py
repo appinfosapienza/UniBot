@@ -1,5 +1,7 @@
+from discord_slash.utils.manage_commands import create_option, create_choice
 from youtube_search import YoutubeSearch
 from discord.ext.commands import Context
+from discord_slash import SlashCommand
 from discord.ext import commands
 from discord.utils import get
 from datetime import date
@@ -10,42 +12,56 @@ import random
 import time
 import os
 
+
 # ---------------------------------------------- #
 # ----------- BOT VARIABLES SECTION ------------ #
 # ---------------------------------------------- #
 
-f = open("tokenBot.txt", encoding='utf8')
+# ------------- University section ------------- #
 
-TOKEN = f.read().strip()  # BOT TOKEN, DO NOT SHARE
+f = open("tokenBot.txt", encoding='utf8')
+TOKEN = f.read().strip()
+
+# Command Prefix
 COMMAND_PREFIX = "!"
 
+# Uptime variables, when using time in a funtion, don't use this variables
 today = str(date.today())
 oraUp = time.strftime("%H", time.localtime())
 minutiUp = time.strftime("%M", time.localtime())
-ruoli = {"abituale": "Abituale", "Abituale": "Abituale", "view-all": "View-All", "View-All": "View-All"}
-file_lezione = 'lezioniLockdown2.txt'
-file_docenti = 'sitiDocenti.txt'
+
+
+# Files directories
 file_ricevimento = 'ricevimentoDocenti.txt'
+file_lezione = 'lezioniLockdown2.txt'
 file_calendario = 'calendario.png'
+file_docenti = 'sitiDocenti.txt'
 file_help = 'help.txt'
-ytlink = "https://www.youtube.com"
+
+# Other variables
 colore = 0x822434
-list_coda = []
+random.seed()
+
+# -------------- Music Bot Section -------------- #
+
+# Queue variables
+list_queue = []
+list_titles = []
+nowPlaying = [""]
+
+# Packages variables
 ydl_opts = {
     'format': 'bestaudio/best',
     'noplaylist': 'True',
     'postprocessors': [{
         'key': 'FFmpegExtractAudio',
         'preferredcodec': 'mp3',
-        'preferredquality': '192',
-    }],
-}
+        'preferredquality': '192'}]}
 FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
-list_titles = []
-nowPlaying = [""]
-global_volume = [0.5]
+ytlink = "https://www.youtube.com"
 
-random.seed()  # Random initialization
+# Volume variable
+global_volume = [0.5]
 
 
 # ---------------------------------------------- #
@@ -53,66 +69,72 @@ random.seed()  # Random initialization
 # ---------------------------------------------- #
 
 
-bot = discord.Client()
+# bot = discord.Client()
 intents = discord.Intents.default()
 intents.members = True
 bot = commands.Bot(command_prefix=COMMAND_PREFIX, intents=intents, help_command=None)
+slash = SlashCommand(bot, sync_commands=True)
 
 
 # ----------------------------------------------- #
 # ------------ BOT.COMMANDS SECTION ------------- #
 # ----------------------------------------------- #
 
+
 @bot.command(aliases=["Restartbot"])
 async def restartbot(ctx: Context):
     message = "I'm self-rebooting (will check for updates during reboot)"
     title = "Reboot"
-    await ctx.channel.send(embed=discord.Embed(title=title, description=message, color=colore))
+    await ctx.send(embed=discord.Embed(title=title, description=message, color=colore))
     os._exit(os.EX_OK)
 
 
-@bot.command(aliases=["Help"])
+@slash.slash(name="help", description="Mostra tutti gli slash commands presenti sul server")
 async def help(ctx: Context):
     f = open(file_help, encoding='utf8')
     helpStr = f.read()
-    titolo = "Unibot 2.0 Help"
-
-    await ctx.channel.send(embed=discord.Embed(title=titolo, description=helpStr, color=colore))
-
-
-@bot.command(aliases=['Hello'])
-async def hello(ctx: Context):
-    await ctx.channel.send(embed=discord.Embed(title="Ciao!", description="Come va?", color=colore))
+    titolo = "Unibot 3.0 Help"
+    await ctx.send(embed=discord.Embed(title=titolo, description=helpStr, color=colore))
 
 
-@bot.command(aliases=['Ora'])
+@slash.slash(name="ora", description="Mostra l'ora attuale")
 async def ora(ctx: Context):
     ora = int(time.strftime("%H", time.localtime()))
     minuti = time.strftime("%M")
     orario = 'Sono le ore ' + str(ora) + ":" + minuti
-    await ctx.channel.send(embed=discord.Embed(title="Ora", description=orario, color=colore))
+    await ctx.send(embed=discord.Embed(title="Ora", description=orario, color=colore))
 
 
-@bot.command(aliases=['Uptime'])
+@slash.slash(name="uptime", description="Mostra l'ora dell'ultimo avvio del bot")
 async def uptime(ctx: Context):
     string = 'Sono online dalle ore ' + str(int(oraUp)) + ":" + minutiUp + ' del giorno ' + today
-    await ctx.channel.send(embed=discord.Embed(title="Uptime", description=string, color=colore))
+    await ctx.send(embed=discord.Embed(title="Uptime", description=string, color=colore))
 
 
-@bot.command(aliases=['Roll'])
-async def roll(ctx: Context, *args):
+@slash.slash(name="roll", description="Rolla un dado virtuale",
+             options=
+             [
+                 create_option
+                 (
+                    name="dado",
+                    description="Inserisci un link o un titolo di un video di youtube",
+                    option_type=3,
+                    required=False
+                 ),
+             ])
+async def roll(ctx: Context, *dado):
     errore = 'I dati inseriti sono errati, utilizzare la formula "!roll LANCIdFACCE", per esempio 1d20 per un lancio di un dado a 20 facce.\n\
                                                            Il massimo di facce e lanci è 200, i valori negativi non vengono accettati.\n'
     istruzioni = 'Utilizzare la formula "!roll LANCIdFACCE", per esempio 1d20 per un lancio di un dado a 20 facce.\n' \
                  'Il massimo di facce e lanci è 200, i valori negativi non vengono accettati.\n'
+    stringok = False
     try:
-        stringok = False
-        stringa = args[0]
+        stringa = dado[0]
         stringok = True
         listaDadoRoll = stringa.split('d')
         if int(listaDadoRoll[0]) > 200 or int(listaDadoRoll[1]) > 200 or int(listaDadoRoll[0]) <= 0 or int(
                 listaDadoRoll[1]) <= 0:
-            await ctx.channel.send(embed=discord.Embed(title="Istruzioni", description=istruzioni, color=colore))
+            await ctx.send(embed=discord.Embed(title="Istruzioni", description=istruzioni, color=colore))
         else:
             resultStrDadi = ''
             rollSomma = 0
@@ -121,32 +143,31 @@ async def roll(ctx: Context, *args):
                 resultStrDadi = resultStrDadi + ' ' + str(rollTemp + 1)
                 rollSomma += rollTemp + 1
             if int(listaDadoRoll[0]) == 1:
-                await ctx.channel.send(
+                await ctx.send(
                     embed=discord.Embed(title="Il risultato del lancio è:", description=str(rollSomma), color=colore))
             else:
-                await ctx.channel.send(embed=discord.Embed(title="Il risultato del lancio è:",
+                await ctx.send(embed=discord.Embed(title="Il risultato del lancio è:",
                                                            description=resultStrDadi + ' ' + '\n' + 'La somma è ' + str(rollSomma),
                                                            color=0x822434))
     except:
         if stringok:
-            await ctx.channel.send(embed=discord.Embed(title="Errore", description=errore, color=colore))
+            await ctx.send(embed=discord.Embed(title="Errore", description=errore, color=colore))
         else:
-            await ctx.channel.send(embed=discord.Embed(title="Istruzioni", description=istruzioni, color=colore))
+            await ctx.send(embed=discord.Embed(title="Istruzioni", description=istruzioni, color=colore))
 
 
-@bot.command(aliases=["Lezione", "lezioni", "Lezioni"])
+@slash.slash(name="lezione", description="Mostra il link della lezione attuale")
 async def lezione(ctx: Context):
-    day = date.today().weekday()  # Prende il giorno della settimana
-    mese = int(time.strftime("%m", time.localtime()))
-    giornoMese = int(time.strftime("%d", time.localtime()))  # Prende il giorno del mese
-    ora = int(time.strftime("%H", time.localtime()))
-    minuti = int(time.strftime("%M", time.localtime()))
+    day = date.today().weekday()
+    month = int(time.strftime("%m", time.localtime()))
+    day_month = int(time.strftime("%d", time.localtime()))
+    hour = int(time.strftime("%H", time.localtime()))
+    minuts = int(time.strftime("%M", time.localtime()))
+    now = (day, hour, minuts, day_month, month)
 
-    ora_attuale = (day, ora, minuti, giornoMese, mese)
+    lezione = funChest.lezione(file_lezione, now)
+    await ctx.send(embed=discord.Embed(title="Lezione:", description=lezione, color=colore))
 
-    lezione = funChest.lezione(file_lezione, ora_attuale)
-
-    await ctx.channel.send(embed=discord.Embed(title="Lezione:", description=lezione, color=colore))
 
 
 @bot.command(aliases=["Calendario"])
@@ -166,7 +187,8 @@ async def docenti(ctx: Context):
 async def ricevimenti(ctx: Context):
     f = open(file_ricevimento, encoding='utf8')
     link_ricevimenti = f.read()
-    await ctx.channel.send(embed=discord.Embed(title="Ricevimento:", description=link_ricevimenti, color=colore))
+    await ctx.send(embed=discord.Embed(title="Ricevimento:", description=link_ricevimenti, color=colore))
+
 
 
 @bot.command(aliases=["Fatti"])
@@ -175,49 +197,69 @@ async def fatti(ctx: Context):
         listaFatti = fatti.readlines()
     factValue = random.randint(0, len(listaFatti))
     listaFatti[factValue] = listaFatti[factValue].rstrip()
-    await ctx.channel.send(embed=discord.Embed(title="Fatto Curioso", description=listaFatti[factValue], color=colore))
+    await ctx.send(embed=discord.Embed(title="Fatto Curioso", description=listaFatti[factValue], color=colore))
 
 
 @bot.command(aliases=['F'])
 async def f(ctx: Context):
-    await ctx.channel.send(embed=discord.Embed(description='**FFFFFFFFFFFFFFFF**\n**F**\n**F**\n**F**\n**FFFFFFFFF**\n**F**\n**F**\n**F**\n**F**\n**F**',
+    await ctx.send(embed=discord.Embed(description='**FFFFFFFFFFFFFFFF**\n**F**\n**F**\n**F**\n**FFFFFFFFF**\n**F**\n**F**\n**F**\n**F**\n**F**',
                                                color=colore))
 
 
-@bot.command(pass_context=True, aliases=['Role'])
-async def role(ctx: Context, *args):
-    errore = 'Il ruolo richiesto non è presente sul server'
-    istruzioni = "**Lista dei ruoli disponibili nel server**" \
-                 "\nPer assegnarsi un ruolo usare il comando !role seguito dal nome del ruolo" \
-                 "\n**Abituale**: Ruolo dedicato a coloro che sono molto attivi sul server e vogliono aiutare la sua crescita." \
-                 "\n**View-All**: Ruolo necessario per visualizzare le chat e le discussioni dei semestri passati\n" \
-                 "\nPer rimuovere un ruolo basta scrivere !remove seguito dal nome del ruolo che si vuole rimuovere"
+@slash.slash(name="role",
+             description="Aggiungi al tuo profilo un ruolo del server",
+             options=[
+               create_option(
+                 name="Ruolo",
+                 description="Scegli il ruolo da abilitare:",
+                 option_type=3,
+                 required=True,
+                 choices=[
+                  create_choice(
+                    name="Abituale: Permette l'accesso alla sezione abituale",
+                    value="Abituale"
+                  ),
+                  create_choice(
+                    name="View-All: Permette l'accesso a tutti i canali delle materie passate",
+                    value="View-All")
+                ]
+               )
+             ])
+async def role(ctx: Context, Ruolo : str):
     try:
-        stringok = False
-        stringa = args[0]
-        stringok = True
-        rle = get(ctx.message.guild.roles, name=ruoli[stringa])
-        await ctx.message.author.add_roles(rle, reason="Richiesto dall'utente")
-        ruolo = "Adesso hai il ruolo **" + ruoli[stringa] + "** e l'accesso alla sezione **Abituali** nel server!\n" + ctx.author.mention + "!"
-        await ctx.channel.send(embed=discord.Embed(title="Ruolo assegnato", description=ruolo, color=colore))
+        rle = get(ctx.guild.roles, name=Ruolo)
+        await ctx.author.add_roles(rle, reason="Richiesto dall'utente")
+        ruolo = "Adesso hai il ruolo **" + Ruolo + "** e l'accesso alla sezione **Abituali** nel server!\n" + ctx.author.mention + "!"
+        await ctx.send(embed=discord.Embed(title="Ruolo assegnato", description=ruolo, color=colore))
     except:
-        if stringok:
-            await ctx.channel.send(embed=discord.Embed(title="Errore", description=errore, color=colore))
-        else:
-            await ctx.channel.send(embed=discord.Embed(title="Lista Ruoli", description=istruzioni, color=colore))
+        await ctx.send(embed=discord.Embed(title="Errore", description='Il ruolo richiesto non è presente sul server', color=colore))
 
 
-@bot.command(aliases=['Remove'])
-async def remove(ctx: Context, *args):
-    errore = 'Il ruolo richiesto non è presente sul server'
+@slash.slash(name="remove",
+             description="Comando per disabilitare un tuo ruolo",
+             options=[
+               create_option(
+                 name="Ruolo",
+                 description="Scegli il ruolo da disabilitare:",
+                 option_type=3,
+                 required=True,
+                 choices=[
+                  create_choice(
+                    name="Abituale",
+                    value="Abituale"
+                  ),
+                  create_choice(
+                    name="View-All",
+                    value="View-All"
+                  )])])
+async def remove(ctx: Context, Ruolo : str):
     try:
-        stringa = args[0]
-        rle = get(ctx.message.guild.roles, name=ruoli[stringa])
-        await ctx.message.author.remove_roles(rle, reason="Richiesto dall'utente")
-        ruolo = "Hai rimosso il ruolo **" + ruoli[stringa] + "**\n" + ctx.author.mention
-        await ctx.channel.send(embed=discord.Embed(title="Ruolo rimosso", description=ruolo, color=colore))
+        rle = get(ctx.guild.roles, name=Ruolo)
+        await ctx.author.remove_roles(rle, reason="Richiesto dall'utente")
+        ruolo = "Hai rimosso il ruolo **" + Ruolo + "**\n" + ctx.author.mention
+        await ctx.send(embed=discord.Embed(title="Ruolo rimosso", description=ruolo, color=colore))
     except:
-        await ctx.channel.send(embed=discord.Embed(title="Errore", description=errore, color=colore))
+        await ctx.send(embed=discord.Embed(title="Errore", description='Il ruolo richiesto non è presente sul server', color=colore))
 
 
 # ---------------------------------------------- #
@@ -225,12 +267,20 @@ async def remove(ctx: Context, *args):
 # ---------------------------------------------- #
 
 
-@bot.command()
-async def play(ctx):
+@slash.slash(name="play", description="Riproduce un brano da youtube",
+             options=
+             [
+                 create_option
+                 (
+                    name="Titolo",
+                    description="Inserisci un link o un titolo di un video di youtube",
+                    option_type=3,
+                    required=True
+                 ),
+             ])
+async def play(ctx, Titolo : str):
     # Cerchiamo l'utente che ha richiesto il brano
-    user = ctx.message.author
-    url = str(ctx.message.content)
-    url = url[5:]
+    user = ctx.author
     if user.voice is None:
         await ctx.send(embed=discord.Embed(title="Utente non trovato",
                                            description="Prima unisciti ad un canale, dopo fai entrare il bot!",
@@ -242,65 +292,59 @@ async def play(ctx):
         await voice_channel.connect()
     except:
         pass
-    if url != "":
-        # Prendiamo l'istanza voice
-        voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+    # Prendiamo l'istanza voice
+    voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+    try:
+        # Cerchiamo il brano
+        results = YoutubeSearch(Titolo, max_results=1).to_dict()
+    except:
+        await ctx.send(embed=discord.Embed(title="Nessun risultato trovato",
+                                           description="Non siamo riusciti a trovare ciò che cercavi\n"
+                                           "Prova ad essere più preciso",
+                                           color=colore))
+        return
+    if voice.is_playing() or voice.is_paused():
+        # Se abbiamo un brano in riproduzione, mettiamo in coda il brano richiesto
+        list_queue.append(Titolo)
+        list_titles.append(results[0]['title'])
+        await ctx.send(embed=discord.Embed(title="Brano messo in coda",
+                                           description="Il brano **" + results[0][
+                                               'title'] + "** è stato messo in coda",
+                                           color=colore))
+        return
+    # Altrimenti lo riproduciamo
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        await ctx.send(embed=discord.Embed(title="Attendere...",
+                                           description="Sto elaborando il brano **" + results[0]['title'] + "**\n "
+                                                       "Dammi un secondo...",
+                                           color=colore))
         try:
-            # Cerchiamo il brano
-            results = YoutubeSearch(url, max_results=1).to_dict()
-        except:
-            await ctx.send(embed=discord.Embed(title="Nessun risultato trovato",
-                                               description="Non siamo riusciti a trovare ciò che cercavi\n"
-                                               "Prova ad essere più preciso",
-                                               color=colore))
-            return
-        if voice.is_playing() or voice.is_paused():
-            # Se abbiamo un brano in riproduzione, mettiamo in coda il brano richiesto
-            list_coda.append(url)
-            list_titles.append(results[0]['title'])
-            await ctx.send(embed=discord.Embed(title="Brano messo in coda",
-                                               description="Il brano **" + results[0][
-                                                   'title'] + "** è stato messo in coda",
-                                               color=colore))
-            return
-        # Altrimenti lo riproduciamo
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            await ctx.send(embed=discord.Embed(title="Attendere...",
-                                               description="Sto elaborando il brano **" + results[0]['title'] + "**\n "
-                                                           "Dammi un secondo...",
-                                               color=colore))
-            try:
-                url = ytlink + results[0]['url_suffix']
-                info = ydl.extract_info(url, download=False)
-            except:
-                await ctx.send(embed=discord.Embed(title="Errore",
-                                                   description="Inserire un link valido\n"
-                                                               "Se il link inserito è valido riprovare più tardi...",
-                                                   color=colore))
-                return
-        # Se la ricerca è andata a buon fine mandiamo il brano in esecuzione
-        try:
-            voice.play(discord.FFmpegPCMAudio(info['formats'][0]['url'], **FFMPEG_OPTS), after=lambda e: queue(ctx))
-            voice.source = discord.PCMVolumeTransformer(voice.source, volume=global_volume[0])
+            Titolo = ytlink + results[0]['url_suffix']
+            info = ydl.extract_info(Titolo, download=False)
         except:
             await ctx.send(embed=discord.Embed(title="Errore",
-                                               description="Ci si è inceppato il disco...",
+                                               description="Inserire un link valido\n"
+                                                           "Se il link inserito è valido riprovare più tardi...",
                                                color=colore))
             return
-        nowPlaying[0] = ytlink + results[0]['url_suffix']
-    else:
-        await ctx.send(embed=discord.Embed(title="Connesso",
-                                           description="Ora scegli un brano!",
+    # Se la ricerca è andata a buon fine mandiamo il brano in esecuzione
+    try:
+        voice.play(discord.FFmpegPCMAudio(info['formats'][0]['url'], **FFMPEG_OPTS), after=lambda e: queue(ctx))
+        voice.source = discord.PCMVolumeTransformer(voice.source, volume=global_volume[0])
+    except:
+        await ctx.send(embed=discord.Embed(title="Errore",
+                                           description="Ci si è inceppato il disco...",
                                            color=colore))
+        return
+    nowPlaying[0] = ytlink + results[0]['url_suffix']
 
 
 # ---GESTIONE DELLA CODA--- #
 
-
 def queue(ctx):
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-    if len(list_coda) != 0:
-        results = YoutubeSearch(list_coda[0], max_results=1).to_dict()
+    if len(list_queue) != 0:
+        results = YoutubeSearch(list_queue[0], max_results=1).to_dict()
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             url = ytlink + results[0]['url_suffix']
             info = ydl.extract_info(url, download=False)
@@ -311,15 +355,16 @@ def queue(ctx):
         except:
             print("Errore nella riproduzione della coda")
             return
-        del list_coda[0]
+        del list_queue[0]
         del list_titles[0]
+
 
 def svuota_coda():
     list_titles.clear()
-    list_coda.clear()
+    list_queue.clear()
 
 
-@bot.command(aliases=["clr"])
+@slash.slash(name="clear", description="Rimuove tutti i brani nella coda")
 async def clear(ctx):
     if await permessi(ctx):
         svuota_coda()
@@ -328,10 +373,10 @@ async def clear(ctx):
                                            color=colore))
 
 
-@bot.command(aliases=["queue"])
+@slash.slash(name="queue", description="Mostra la coda")
 async def coda(ctx):
     if await permessi(ctx):
-        if len(list_coda) == 0:
+        if len(list_queue) == 0:
             await ctx.send(embed=discord.Embed(title="Coda vuota",
                                                description="Nella coda non è presente nessun brano",
                                                color=colore))
@@ -342,7 +387,7 @@ async def coda(ctx):
                                                color=colore))
 
 
-@bot.command(aliases=["NowPlaying"])
+@slash.slash(name="nowPlaying", description="Mostra il brano attualmente in riproduzione")
 async def np(ctx):
     if await permessi(ctx):
         voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
@@ -364,7 +409,7 @@ async def volume(ctx, *args):
     if await permessi(ctx):
         voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
         try:
-            volume = args[0]
+            volume = Volume[0]
         except:
             await ctx.send(embed=discord.Embed(title="Volume",
                                                description="Il volume al momento è a " + str(global_volume[0]*100),
@@ -395,12 +440,13 @@ async def volume(ctx, *args):
                                                color=colore))
 
 
+
 @bot.command(aliases=["next"])
 async def skip(ctx):
     if await permessi(ctx):
         voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
         if voice.is_connected() and voice.is_playing():
-            if len(list_coda) == 0:
+            if len(list_queue) == 0:
                 await ctx.send(embed=discord.Embed(title="Riproduzione terminata",
                                                    description="I brani in coda sono terminati, aggiungine altri!",
                                                    color=colore))
@@ -430,6 +476,7 @@ async def disconnect(ctx):
             await ctx.send(embed=discord.Embed(title="Errore",
                                                description="Il bot non è connesso a nessuna chat vocale",
                                                color=colore))
+
 
 
 @bot.command()
@@ -466,7 +513,7 @@ async def resume(ctx):
                                                color=colore))
 
 
-@bot.command()
+@slash.slash(name="stop", description="Interrompe la riproduzione e elimina la coda")
 async def stop(ctx):
     if await permessi(ctx):
         svuota_coda()
@@ -483,7 +530,7 @@ async def stop(ctx):
 
 
 async def permessi(ctx):
-    user = ctx.message.author
+    user = ctx.author
     if user.voice is None:
         await ctx.send(embed=discord.Embed(title="Errore",
                                            description="Per usare il bot musicale, connettiti ad un canale vocale",
