@@ -1,10 +1,11 @@
 from discord_slash.utils.manage_commands import create_option, create_choice
-from youtube_search import YoutubeSearch
+# from youtube_search import YoutubeSearch
 from discord.ext.commands import Context
 from discord_slash import SlashCommand
 from discord.ext import commands
 from discord.utils import get
 from datetime import date
+import youtube_dl.utils
 import discord.utils
 import youtube_dl
 import funChest
@@ -48,8 +49,10 @@ random.seed()
 list_queue = []
 list_titles = []
 nowPlaying = [""]
+url_list = []
 
 # Packages variables
+youtube_dl.utils.std_headers['Cookie'] = ''
 ydl_opts = {
     'format': 'bestaudio/best',
     'noplaylist': 'True',
@@ -265,8 +268,7 @@ async def remove(ctx: Context, Ruolo: str):
 # ------------ MUSIC BOT SECTION --------------- #
 # ---------------------------------------------- #
 
-
-@slash.slash(name="play", description="Riproduce un brano da youtube",
+@slash.slash(name="play", description="Riproduce un brano da youtube", guild_ids=[823275824014819388],
              options=
              [
                  create_option
@@ -277,56 +279,66 @@ async def remove(ctx: Context, Ruolo: str):
                     required=True
                  ),
              ])
-async def play(ctx, Titolo: str):
-    # Cerchiamo l'utente che ha richiesto il brano
+async def play(ctx, url : str):
+    # We first search for the user that wrote the message
     user = ctx.author
+    # Than we get our query/url (you can use both!)
     if user.voice is None:
+        # If the user doesn't stay in any voice channel, we send him a message
         await ctx.send(embed=discord.Embed(title="Utente non trovato",
                                            description="Prima unisciti ad un canale, dopo fai entrare il bot!",
                                            color=colore))
         return
-    # Ci tentiamo di connettere al canale dell'utente
+    # Then we try to connect to his channel
     voice_channel = user.voice.channel
     try:
         await voice_channel.connect()
     except:
+        # If you have channels that the bot cannot see on your server, you have to manage that code here
         pass
-    # Prendiamo l'istanza voice
+    # We take the "bot voice" instance
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+    '''
     try:
-        # Cerchiamo il brano
-        results = YoutubeSearch(Titolo, max_results=1).to_dict()
+        # And then start to search for our song on youtube
+        results = YoutubeSearch(url, max_results=1).to_dict()
     except:
         await ctx.send(embed=discord.Embed(title="Nessun risultato trovato",
                                            description="Non siamo riusciti a trovare ciò che cercavi\n"
                                            "Prova ad essere più preciso",
                                            color=colore))
         return
-    if voice.is_playing() or voice.is_paused():
-        # Se abbiamo un brano in riproduzione, mettiamo in coda il brano richiesto
-        list_queue.append(Titolo)
-        list_titles.append(results[0]['title'])
-        await ctx.send(embed=discord.Embed(title="Brano messo in coda",
-                                           description="Il brano **" + results[0][
-                                               'title'] + "** è stato messo in coda",
-                                           color=colore))
-        return
-    # Altrimenti lo riproduciamo
+    '''
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        await ctx.send(embed=discord.Embed(title="Attendere...",
-                                           description="Sto elaborando il brano **" + results[0]['title'] + "**\n "
-                                                       "Dammi un secondo...",
-                                           color=colore))
+        #print(results)
+        #await ctx.send(embed=discord.Embed(title="Attendere...",
+        #                                   description="Sto elaborando il brano **" + results[0]['title'] + "**\n "
+        #                                               "Dammi un secondo...",
+        #                                   color=colore))
         try:
-            Titolo = ytlink + results[0]['url_suffix']
-            info = ydl.extract_info(Titolo, download=False)
+            # Now we extract the video info using youtube_dl
+            #url = ytlink + results[0]['url_suffix']
+            info = ydl.extract_info(url, download=False)
+            print(info)
         except:
             await ctx.send(embed=discord.Embed(title="Errore",
                                                description="Inserire un link valido\n"
                                                            "Se il link inserito è valido riprovare più tardi...",
                                                color=colore))
             return
-    # Se la ricerca è andata a buon fine mandiamo il brano in esecuzione
+    if voice.is_playing() or voice.is_paused():
+        # If we are listening to a song, we add the new song to the queue
+        list_queue.append(info)
+        #url_list.append(ytlink + results[0]['url_suffix'])
+        url_list.append(url)
+        #list_titles.append(results[0]['title'])
+        list_titles.append(url)
+        await ctx.send(embed=discord.Embed(title="Brano messo in coda",
+                                           description="Il brano **" + url + #results[0]['title'] +
+                                                        "** è stato messo in coda",
+                                           color=colore))
+        return
+    # If all goes as planned while searching the song on youtube, we finally start to play the song
     try:
         voice.play(discord.FFmpegPCMAudio(info['formats'][0]['url'], **FFMPEG_OPTS), after=lambda e: queue(ctx))
         voice.source = discord.PCMVolumeTransformer(voice.source, volume=global_volume[0])
@@ -335,27 +347,33 @@ async def play(ctx, Titolo: str):
                                            description="Ci si è inceppato il disco...",
                                            color=colore))
         return
-    nowPlaying[0] = ytlink + results[0]['url_suffix']
+    nowPlaying[0] = url
 
 
 # ---GESTIONE DELLA CODA--- #
 
+
 def queue(ctx):
+    # This is where our queue gets underway
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     if len(list_queue) != 0:
-        results = YoutubeSearch(list_queue[0], max_results=1).to_dict()
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            url = ytlink + results[0]['url_suffix']
-            info = ydl.extract_info(url, download=False)
         try:
-            voice.play(discord.FFmpegPCMAudio(info['formats'][0]['url'], **FFMPEG_OPTS), after=lambda e: queue(ctx))
+            voice.play(discord.FFmpegPCMAudio(list_queue[0]['formats'][0]['url'], **FFMPEG_OPTS), after=lambda e: queue(ctx))
             voice.source = discord.PCMVolumeTransformer(voice.source, volume=global_volume[0])
-            nowPlaying[0] = ytlink + results[0]['url_suffix']
+            nowPlaying[0] = url_list[0]
         except:
             print("Errore nella riproduzione della coda")
             return
         del list_queue[0]
         del list_titles[0]
+        del url_list[0]
+
+
+def svuota_coda():
+    list_titles.clear()
+    list_queue.clear()
+    url_list.clear()
+
 
 
 def svuota_coda():
