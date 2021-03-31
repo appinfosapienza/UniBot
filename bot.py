@@ -268,7 +268,7 @@ async def remove(ctx: Context, Ruolo: str):
 # ------------ MUSIC BOT SECTION --------------- #
 # ---------------------------------------------- #
 
-@slash.slash(name="play", description="Riproduce un brano da youtube", guild_ids=[823275824014819388],
+@slash.slash(name="play", description="Riproduce un brano da youtube",
              options=
              [
                  create_option
