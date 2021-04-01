@@ -13,7 +13,6 @@ import random
 import time
 import os
 
-
 # ---------------------------------------------- #
 # ----------- BOT VARIABLES SECTION ------------ #
 # ---------------------------------------------- #
@@ -30,7 +29,6 @@ COMMAND_PREFIX = "!"
 today = str(date.today())
 oraUp = time.strftime("%H", time.localtime())
 minutiUp = time.strftime("%M", time.localtime())
-
 
 # Files directories
 file_ricevimento = 'ricevimentoDocenti.txt'
@@ -61,11 +59,10 @@ ydl_opts = {
         'preferredcodec': 'mp3',
         'preferredquality': '192'}]}
 FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
-ytlink = "https://www.youtube.com"
+ytlink = "https://www.youtube.com/watch?v="
 
 # Volume variable
 global_volume = [0.5]
-
 
 # ---------------------------------------------- #
 # ----------- BOT STARTUP SECTION -------------- #
@@ -118,11 +115,11 @@ async def uptime(ctx: Context):
              options=
              [
                  create_option
-                 (
-                    name="dado",
-                    description="Inserisci un link o un titolo di un video di youtube",
-                    option_type=3,
-                    required=False
+                     (
+                     name="dado",
+                     description="Inserisci un link o un titolo di un video di youtube",
+                     option_type=3,
+                     required=False
                  ),
              ])
 async def roll(ctx: Context, *dado):
@@ -150,7 +147,8 @@ async def roll(ctx: Context, *dado):
                     embed=discord.Embed(title="Il risultato del lancio è:", description=str(rollSomma), color=colore))
             else:
                 await ctx.send(embed=discord.Embed(title="Il risultato del lancio è:",
-                                                   description=resultStrDadi + ' ' + '\n' + 'La somma è ' + str(rollSomma),
+                                                   description=resultStrDadi + ' ' + '\n' + 'La somma è ' + str(
+                                                       rollSomma),
                                                    color=0x822434))
     except:
         if stringok:
@@ -204,28 +202,29 @@ async def fatti(ctx: Context):
 
 @slash.slash(name="F", description="F")
 async def f(ctx: Context):
-    await ctx.send(embed=discord.Embed(description='**FFFFFFFFFFFFFFFF**\n**F**\n**F**\n**F**\n**FFFFFFFFF**\n**F**\n**F**\n**F**\n**F**\n**F**',
-                                               color=colore))
+    await ctx.send(embed=discord.Embed(
+        description='**FFFFFFFFFFFFFFFF**\n**F**\n**F**\n**F**\n**FFFFFFFFF**\n**F**\n**F**\n**F**\n**F**\n**F**',
+        color=colore))
 
 
 @slash.slash(name="role",
              description="Aggiungi al tuo profilo un ruolo del server",
              options=[
-               create_option(
-                 name="Ruolo",
-                 description="Scegli il ruolo da abilitare:",
-                 option_type=3,
-                 required=True,
-                 choices=[
-                  create_choice(
-                    name="Abituale: Permette l'accesso alla sezione abituale",
-                    value="Abituale"
-                  ),
-                  create_choice(
-                    name="View-All: Permette l'accesso a tutti i canali delle materie passate",
-                    value="View-All")
-                ]
-               )
+                 create_option(
+                     name="Ruolo",
+                     description="Scegli il ruolo da abilitare:",
+                     option_type=3,
+                     required=True,
+                     choices=[
+                         create_choice(
+                             name="Abituale: Permette l'accesso alla sezione abituale",
+                             value="Abituale"
+                         ),
+                         create_choice(
+                             name="View-All: Permette l'accesso a tutti i canali delle materie passate",
+                             value="View-All")
+                     ]
+                 )
              ])
 async def role(ctx: Context, Ruolo: str):
     try:
@@ -234,26 +233,27 @@ async def role(ctx: Context, Ruolo: str):
         ruolo = "Adesso hai il ruolo **" + Ruolo + "** e l'accesso alla sezione **Abituali** nel server!\n" + ctx.author.mention + "!"
         await ctx.send(embed=discord.Embed(title="Ruolo assegnato", description=ruolo, color=colore))
     except:
-        await ctx.send(embed=discord.Embed(title="Errore", description='Il ruolo richiesto non è presente sul server', color=colore))
+        await ctx.send(embed=discord.Embed(title="Errore", description='Il ruolo richiesto non è presente sul server',
+                                           color=colore))
 
 
 @slash.slash(name="remove",
              description="Comando per disabilitare un tuo ruolo",
              options=[
-               create_option(
-                 name="Ruolo",
-                 description="Scegli il ruolo da disabilitare:",
-                 option_type=3,
-                 required=True,
-                 choices=[
-                  create_choice(
-                    name="Abituale",
-                    value="Abituale"
-                  ),
-                  create_choice(
-                    name="View-All",
-                    value="View-All"
-                  )])])
+                 create_option(
+                     name="Ruolo",
+                     description="Scegli il ruolo da disabilitare:",
+                     option_type=3,
+                     required=True,
+                     choices=[
+                         create_choice(
+                             name="Abituale",
+                             value="Abituale"
+                         ),
+                         create_choice(
+                             name="View-All",
+                             value="View-All"
+                         )])])
 async def remove(ctx: Context, Ruolo: str):
     try:
         rle = get(ctx.guild.roles, name=Ruolo)
@@ -261,25 +261,26 @@ async def remove(ctx: Context, Ruolo: str):
         ruolo = "Hai rimosso il ruolo **" + Ruolo + "**\n" + ctx.author.mention
         await ctx.send(embed=discord.Embed(title="Ruolo rimosso", description=ruolo, color=colore))
     except:
-        await ctx.send(embed=discord.Embed(title="Errore", description='Il ruolo richiesto non è presente sul server', color=colore))
+        await ctx.send(embed=discord.Embed(title="Errore", description='Il ruolo richiesto non è presente sul server',
+                                           color=colore))
 
 
 # ---------------------------------------------- #
 # ------------ MUSIC BOT SECTION --------------- #
 # ---------------------------------------------- #
 
+
 @slash.slash(name="play", description="Riproduce un brano da youtube",
              options=
              [
-                 create_option
-                 (
-                    name="Titolo",
-                    description="Inserisci un link o un titolo di un video di youtube",
-                    option_type=3,
-                    required=True
-                 ),
+                 create_option(
+                        name="Titolo",
+                        description="Inserisci un link o un titolo di un video di youtube",
+                        option_type=3,
+                        required=True
+                     ),
              ])
-async def play(ctx, url : str):
+async def play(ctx, url: str):
     # We first search for the user that wrote the message
     user = ctx.author
     # Than we get our query/url (you can use both!)
@@ -298,46 +299,37 @@ async def play(ctx, url : str):
         pass
     # We take the "bot voice" instance
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-    '''
-    try:
-        # And then start to search for our song on youtube
-        results = YoutubeSearch(url, max_results=1).to_dict()
-    except:
-        await ctx.send(embed=discord.Embed(title="Nessun risultato trovato",
-                                           description="Non siamo riusciti a trovare ciò che cercavi\n"
-                                           "Prova ad essere più preciso",
-                                           color=colore))
-        return
-    '''
+
+    # Then we search the video on yt
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        #print(results)
-        #await ctx.send(embed=discord.Embed(title="Attendere...",
-        #                                   description="Sto elaborando il brano **" + results[0]['title'] + "**\n "
-        #                                               "Dammi un secondo...",
-        #                                   color=colore))
         try:
-            # Now we extract the video info using youtube_dl
-            #url = ytlink + results[0]['url_suffix']
             info = ydl.extract_info(url, download=False)
-            print(info)
         except:
-            await ctx.send(embed=discord.Embed(title="Errore",
-                                               description="Inserire un link valido\n"
-                                                           "Se il link inserito è valido riprovare più tardi...",
-                                               color=colore))
-            return
+            try:
+                info = ydl.extract_info(f"ytsearch:{url}", download=False)['entries'][0]
+            except:
+                await ctx.send(embed=discord.Embed(title="Errore nel reperimento del brano",
+                                           description="Non siamo riusciti a reperire il brano richiesto \n"
+                                                       "Cortesemente, riprova più tardi",
+                                           color=colore))
+                return
+
+    # If we are listening to a song, we add the new song to the queue
     if voice.is_playing() or voice.is_paused():
-        # If we are listening to a song, we add the new song to the queue
         list_queue.append(info)
-        #url_list.append(ytlink + results[0]['url_suffix'])
-        url_list.append(url)
-        #list_titles.append(results[0]['title'])
-        list_titles.append(url)
+        url_list.append(ytlink + info['id'])
+        list_titles.append(info['title'])
         await ctx.send(embed=discord.Embed(title="Brano messo in coda",
-                                           description="Il brano **" + url + #results[0]['title'] +
-                                                        "** è stato messo in coda",
+                                           description="Il brano **" + info['title'] +
+                                                       "** è stato messo in coda",
                                            color=colore))
         return
+
+    await ctx.send(embed=discord.Embed(title="Elaborazione brano",
+                                       description="Stiamo elaborando il brano **" + info['title'] + "**\n"
+                                                   "Attendere qualche istante...",
+                                       color=colore))
+
     # If all goes as planned while searching the song on youtube, we finally start to play the song
     try:
         voice.play(discord.FFmpegPCMAudio(info['formats'][0]['url'], **FFMPEG_OPTS), after=lambda e: queue(ctx))
@@ -347,7 +339,7 @@ async def play(ctx, url : str):
                                            description="Ci si è inceppato il disco...",
                                            color=colore))
         return
-    nowPlaying[0] = url
+    nowPlaying[0] = ytlink + info['id']
 
 
 # ---GESTIONE DELLA CODA--- #
@@ -358,7 +350,8 @@ def queue(ctx):
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     if len(list_queue) != 0:
         try:
-            voice.play(discord.FFmpegPCMAudio(list_queue[0]['formats'][0]['url'], **FFMPEG_OPTS), after=lambda e: queue(ctx))
+            voice.play(discord.FFmpegPCMAudio(list_queue[0]['formats'][0]['url'], **FFMPEG_OPTS),
+                       after=lambda e: queue(ctx))
             voice.source = discord.PCMVolumeTransformer(voice.source, volume=global_volume[0])
             nowPlaying[0] = url_list[0]
         except:
@@ -373,7 +366,6 @@ def svuota_coda():
     list_titles.clear()
     list_queue.clear()
     url_list.clear()
-
 
 
 def svuota_coda():
@@ -421,12 +413,12 @@ async def np(ctx):
 
 @slash.slash(name="volume", description="Mostra a che livello è il volume e permette di modificarlo",
              options=[
-               create_option(
-                 name="Volume",
-                 description="Inserisci un valore da 0 a 100",
-                 option_type=3,
-                 required=False
-               )
+                 create_option(
+                     name="Volume",
+                     description="Inserisci un valore da 0 a 100",
+                     option_type=3,
+                     required=False
+                 )
              ])
 async def volume(ctx, *Volume: int):
     if await permessi(ctx):
@@ -435,7 +427,7 @@ async def volume(ctx, *Volume: int):
             volume = Volume[0]
         except:
             await ctx.send(embed=discord.Embed(title="Volume",
-                                               description="Il volume al momento è a " + str(global_volume[0]*100),
+                                               description="Il volume al momento è a " + str(global_volume[0] * 100),
                                                color=colore))
             return
         try:
@@ -474,8 +466,9 @@ async def skip(ctx):
                                                    color=colore))
             else:
                 await ctx.send(embed=discord.Embed(title="Brano Skippato",
-                                                   description="Sto elaborando il nuovo brano **" + list_titles[0] + "**\n"
-                                                               "Dammi un secondo...",
+                                                   description="Sto elaborando il nuovo brano **" + list_titles[
+                                                       0] + "**\n"
+                                                            "Dammi un secondo...",
                                                    color=colore))
             voice.stop()
         else:
@@ -567,6 +560,7 @@ async def permessi(ctx):
             return False
     return True
 
+
 # ---------------------------------------------- #
 # ------------ BOT.EVENT SECTION --------------- #
 # ---------------------------------------------- #
@@ -589,8 +583,9 @@ async def on_message(message):
         await bot.close()
 
     if message.content == "f" or message.content == "F":
-        await message.channel.send(embed=discord.Embed(description='**FFFFFFFFFFFFFFFF**\n**F**\n**F**\n**F**\n**FFFFFFFFF**\n**F**\n**F**\n**F**\n**F**\n**F**',
-                                                       color=colore))
+        await message.channel.send(embed=discord.Embed(
+            description='**FFFFFFFFFFFFFFFF**\n**F**\n**F**\n**F**\n**FFFFFFFFF**\n**F**\n**F**\n**F**\n**F**\n**F**',
+            color=colore))
 
     if '*' in message.content:
         stringa = message.content.replace('*', 'Ə') + ' #GenderNeutrale'
