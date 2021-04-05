@@ -309,9 +309,10 @@ async def play(ctx, url: str):
                 info = ydl.extract_info(f"ytsearch:{url}", download=False)['entries'][0]
             except:
                 await ctx.send(embed=discord.Embed(title="Errore nel reperimento del brano",
-                                           description="Non siamo riusciti a reperire il brano richiesto \n"
-                                                       "Cortesemente, riprova più tardi",
-                                           color=colore))
+                                                   description="Non siamo riusciti a reperire il brano richiesto \n"
+                                                               "Prova a formulare la tua richiesta nella forma: \n"
+                                                               "'Artista - Titolo Brano'\n",
+                                                   color=colore))
                 return
 
     # If we are listening to a song, we add the new song to the queue
@@ -342,7 +343,7 @@ async def play(ctx, url: str):
     nowPlaying[0] = ytlink + info['id']
 
 
-# ---GESTIONE DELLA CODA--- #
+# ---QUEUE FUNCTIONS--- #
 
 
 def queue(ctx):
@@ -368,11 +369,6 @@ def svuota_coda():
     url_list.clear()
 
 
-def svuota_coda():
-    list_titles.clear()
-    list_queue.clear()
-
-
 @slash.slash(name="clear", description="Rimuove tutti i brani nella coda")
 async def clear(ctx):
     if await permessi(ctx):
@@ -384,13 +380,17 @@ async def clear(ctx):
 
 @slash.slash(name="queue", description="Mostra la coda")
 async def coda(ctx):
+    contatore = 0
+    stringa = ""
     if await permessi(ctx):
         if len(list_queue) == 0:
             await ctx.send(embed=discord.Embed(title="Coda vuota",
                                                description="Nella coda non è presente nessun brano",
                                                color=colore))
         else:
-            stringa = "\n".join(list_titles)
+            for elemento in list_titles:
+                contatore += 1
+                stringa += str(contatore) + "- " + elemento + "\n"
             await ctx.send(embed=discord.Embed(title="Coda",
                                                description=stringa,
                                                color=colore))
@@ -408,7 +408,34 @@ async def np(ctx):
             await ctx.send(nowPlaying[0])
 
 
-# ---FINE GESTIONE DELLA CODA--- #
+@slash.slash(name="remove", description="Rimuove un brano dalla coda",
+             options=
+             [
+                 create_option(
+                     name="Indice",
+                     description="Indice del brano da rimuovere (puoi reperire gli indici con il comando queue)",
+                     option_type=4,
+                     required=True
+                 ),
+             ])
+async def remove(ctx, indi: int):
+    if await(permessi(ctx)):
+        indice = indi - 1
+        if indice < len(list_queue):
+            await ctx.send(embed=discord.Embed(title="Brano Skippato",
+                                               description="Il brano **" + list_titles[indice] + "** "
+                                                                                                 "è stato eliminato dalla coda",
+                                               color=colore))
+            del list_queue[indice]
+            del list_titles[indice]
+            del url_list[indice]
+        else:
+            await ctx.send(embed=discord.Embed(title="Indice inesistente",
+                                               description="Non esiste nessun brano con tale indice nella coda",
+                                               color=colore))
+
+
+# ---END OF QUEUE FUNCTIONS--- #
 
 
 @slash.slash(name="volume", description="Mostra a che livello è il volume e permette di modificarlo",
@@ -416,7 +443,7 @@ async def np(ctx):
                  create_option(
                      name="Volume",
                      description="Inserisci un valore da 0 a 100",
-                     option_type=3,
+                     option_type=4,
                      required=False
                  )
              ])
