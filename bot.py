@@ -418,7 +418,7 @@ async def np(ctx):
                      required=True
                  ),
              ])
-async def remove(ctx, indi: int):
+async def delet(ctx, indi: int):
     if await(permessi(ctx)):
         indice = indi - 1
         if indice < len(list_queue):
