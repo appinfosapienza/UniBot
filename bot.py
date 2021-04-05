@@ -408,7 +408,7 @@ async def np(ctx):
             await ctx.send(nowPlaying[0])
 
 
-@slash.slash(name="remove", description="Rimuove un brano dalla coda",
+@slash.slash(name="delete", description="Rimuove un brano dalla coda",
              options=
              [
                  create_option(
