@@ -326,7 +326,7 @@ async def play(ctx, url: str):
                                            color=colore))
         return
 
-    await ctx.send(embed=discord.Embed(title="Elaborazione brano",
+    await ctx.send(embed=discord.Embed(title="Ora in riproduzione",
                                        description="Stiamo elaborando il brano **" + info['title'] + "**\n"
                                                    "Attendere qualche istante...",
                                        color=colore))
@@ -355,9 +355,12 @@ def queue(ctx):
                        after=lambda e: queue(ctx))
             voice.source = discord.PCMVolumeTransformer(voice.source, volume=global_volume[0])
             nowPlaying[0] = url_list[0]
+            channel = bot.get_channel(ctx.channel_id)
+            bot.loop.create_task(channel.send(embed=discord.Embed(title="Ora in Riproduzione",
+                                              description="Stiamo elaborando il brano **" + list_titles[0] + "**\n"
+                                              "Attendere qualche istante...", color=colore)))
         except:
             print("Errore nella riproduzione della coda")
-            return
         del list_queue[0]
         del list_titles[0]
         del url_list[0]
@@ -493,9 +496,7 @@ async def skip(ctx):
                                                    color=colore))
             else:
                 await ctx.send(embed=discord.Embed(title="Brano Skippato",
-                                                   description="Sto elaborando il nuovo brano **" + list_titles[
-                                                       0] + "**\n"
-                                                            "Dammi un secondo...",
+                                                   description="Il brano è stato skippato",
                                                    color=colore))
             voice.stop()
         else:
@@ -561,7 +562,7 @@ async def stop(ctx):
         voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
         if voice.is_playing():
             await ctx.send(embed=discord.Embed(title="Stop",
-                                               description="Brano interrotto",
+                                               description="La riproduzione è stata interrotta",
                                                color=colore))
             voice.stop()
         else:
