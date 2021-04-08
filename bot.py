@@ -81,6 +81,13 @@ slash = SlashCommand(bot, sync_commands=True)
 # ----------------------------------------------- #
 
 
+@bot.event
+async def on_slash_command_error(ctx, ex):
+    await ctx.send(embed=discord.Embed(title="Errore", description="C'è stato un problema con l'esecuzione del tuo"
+                                                                   "comando\n Il server potrebbe essere sovraccarico,"
+                                                                   "Riprova più tardi", color=colore))
+
+
 @bot.command(aliases=["Restartbot"])
 async def restartbot(ctx: Context):
     message = "I'm self-rebooting (will check for updates during reboot)"
@@ -343,6 +350,7 @@ async def play(ctx, url: str):
     nowPlaying[0] = ytlink + info['id']
 
 
+
 # ---QUEUE FUNCTIONS--- #
 
 
@@ -600,6 +608,11 @@ async def on_ready():
 async def on_message(message):
     if message.author == bot.user:
         return
+
+    if message.content.startswith('!'):
+        await message.channel.send(embed=discord.Embed(description='Per caso intendevi /' + message.content[1::] + '?\n'
+                                                       "Il bot da oggi risponde solamente ai comandi definiti con lo /",
+                                                       color=colore))
 
     if message.content == 'shootdawnbotter':
         myid = '<@131058082003288064>'
