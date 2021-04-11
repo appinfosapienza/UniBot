@@ -32,7 +32,7 @@ minutiUp = time.strftime("%M", time.localtime())
 
 # Files directories
 file_ricevimento = 'ricevimentoDocenti.txt'
-file_lezione = 'lezioniLockdown.txt'
+file_lezione = 'lezioni.txt'
 file_calendario = 'calendario.png'
 file_docenti = 'sitiDocenti.txt'
 file_help = 'help.txt'
