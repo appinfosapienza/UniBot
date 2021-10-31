@@ -1,4 +1,4 @@
-# unibot
+# UniBot (Deprecated)
 ### Discord bot for the Computer Science class in Sapienza, University of Rome
 
 Alcune piccole regole per la scrittura del codice:
